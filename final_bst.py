@@ -1,3 +1,7 @@
+#class node ini berisi data barang yang akan diinputkan ke dalam binary search tree
+#yang terdiri dari nama,harga,stok,sku,left,right
+#left dan right ini adalah pointer yang menunjuk ke node lain ke node kiri atau kanan dengan
+#menyesuaikan nilai sku dan juga merujuk pada strukdata binary search tree
 class Node:
     def __init__(self, sku, nama, harga, stok):
         self.sku = sku
@@ -7,53 +11,88 @@ class Node:
         self.left = None
         self.right = None
 
-class BST:
+#fungsi class BinarySearchTree ini sudah sesuai dengan modul yang diberikan
+class BinarySearchTree:
     def __init__(self):
-        self.root = None
+        self.root = None 
 
+    #fungsi insert ini berfungsi untuk memasukkan data barang ke dalam binary search tree
     def insert(self, sku, nama, harga, stok):
+        #membuat node baru
+        new_node = Node(sku, nama, harga, stok)
+        #new_node =  Misalnya Node(1234, "Buku", 10000, 10)
         if self.root is None:
-            self.root = Node(sku, nama, harga, stok)
-        else:
-            self._insert(self.root, sku, nama, harga, stok)
+            #jika root masih kosong maka node baru akan menjadi root
+            self.root = new_node
+            #mengembalikan nilai true
+            return True
+        #membuat variabel temp yang menunjuk ke root
+        temp = self.root
 
-    def _insert(self, current_node, sku, nama, harga, stok):
-        if sku < current_node.sku:
-            if current_node.left is None:
-                current_node.left = Node(sku, nama, harga, stok)
+        #melakukan perulangan selama true
+        while True:
+            #jika sku dari node baru sama dengan sku dari temp
+            if new_node.sku == temp.sku:
+                #maka akan mengembalikan nilai false
+                return False
+                
+                #jika sku dari node baru lebih kecil dari sku dari temp
+            if new_node.sku < temp.sku:
+                #jika temp.left adalah none
+                if temp.left is None:
+                    #maka temp.left adalah node baru
+                    temp.left = new_node
+                    #mengembalikan nilai true
+                    return True
+                #jika temp.left bukan none
+                temp = temp.left
+
+                #jika sku dari node baru lebih besar dari sku dari temp
             else:
-                self._insert(current_node.left, sku, nama, harga, stok)
-        elif sku > current_node.sku:
-            if current_node.right is None:
-                current_node.right = Node(sku, nama, harga, stok)
+                if temp.right is None:
+                    #maka temp.right adalah node baru
+                    temp.right = new_node
+                    return True
+                temp = temp.right
+
+    #fungsi contains ini berfungsi untuk mengecek apakah sku yang diinputkan sudah ada di dalam binary search tree
+    def contains(self, sku):
+        #membuat variabel temp yang menunjuk ke root yang berisi dari self.root root ini adalah node yang pertama kali diinputkan
+        temp = self.root
+
+        #melakukan perulangan selama temp tidak none
+        while temp is not None:
+            #jika sku yang diinputkan sama dengan sku dari temp
+            if sku < temp.sku:
+                #maka temp adalah temp.left
+                temp = temp.left
+            #jika sku yang diinputkan lebih besar dari sku dari temp
+            elif sku > temp.sku:
+                #maka temp adalah temp.right atau temp kanan treenya berada di sebelah kanan untuk BSTnya
+                temp = temp.right
             else:
-                self._insert(current_node.right, sku, nama, harga, stok)
-        else:
-            print("SKU sudah ada di BST.")
+                #mengembalikan nilai temp
+                return temp
+        return None
 
-    def search(self, sku):
-        return self._search(self.root, sku)
-
-    def _search(self, current_node, sku):
-        if current_node is None:
-            return None
-        elif current_node.sku == sku:
-            return current_node
-        elif sku < current_node.sku:
-            return self._search(current_node.left, sku)
-        else:
-            return self._search(current_node.right, sku)
-
+    #fungsi restock ini berfungsi untuk menambahkan stok barang yang sudah ada di dalam binary search tree
     def restock(self, sku, jumlah):
-        node = self.search(sku)
+        #membuat variabel node yang berisi dari fungsi contains yang berisi sku
+        node = self.contains(sku)
+        #jika node ada
         if node:
+            #maka node.stok adalah node.stok ditambah jumlah
             node.stok += jumlah
+            #mengembalikan nilai true dan menampilkan pesan stok barang berhasil ditambahkan
             print(f"Stok barang {node.nama} berhasil ditambahkan. Total stok: {node.stok}")
         else:
+            #jika node tidak ada maka akan menampilkan pesan SKU tidak ditemukan
             print("SKU tidak ditemukan.")
 
+    #fungsi display ini berfungsi untuk menampilkan data barang yang ada di dalam binary search tree
     def display(self, node):
         if node:
+            #menampilkan data barang yang ada di dalam binary search tree
             self.display(node.left)
             print(f"SKU: {node.sku}, Nama: {node.nama}, Harga: {node.harga}, Stok: {node.stok}")
             self.display(node.right)
@@ -61,17 +100,28 @@ class BST:
 # Data Transaksi Konsumen
 transaksi_konsumen = []
 
+def lihat_barang_dan_stok():
+    print("\n=== Data Barang dan Jumlah Stok ===")
+    if bst.root is None:
+        print("Belum ada data barang yang diinputkan.")
+    else:
+        print("Daftar Barang:")
+        bst.display(bst.root)
+
 def menu_utama():
     while True:
         print("\n=== Menu Utama ===")
         print("1. Kelola Stok Barang")
         print("2. Kelola Transaksi Konsumen")
+        print("3. Lihat Barang dan Jumlah Stok")
         print("0. Exit Program")
         pilihan = input("Pilih menu: ")
         if pilihan == '1':
             kelola_stok_barang()
         elif pilihan == '2':
             kelola_transaksi_konsumen()
+        elif pilihan == '3':
+            lihat_barang_dan_stok()
         elif pilihan == '0':
             print("Terima kasih! Program selesai.")
             break
@@ -114,8 +164,17 @@ def kelola_transaksi_konsumen():
             print("Pilihan tidak valid. Silakan coba lagi.")
 
 def input_data_stok_barang():
-    sku = input("Masukkan SKU (4 digit angka): ")
-    if bst.search(sku):
+    while True:
+        try:
+            sku = int(input("Masukkan SKU (4 digit angka): "))
+            if 1000 <= sku <= 9999:
+                break
+            else:
+                print("SKU harus terdiri dari 4 digit angka.")
+        except ValueError:
+            print("Input tidak valid. Harap masukkan 4 digit angka.")
+
+    if bst.contains(sku):
         print("SKU sudah ada di BST.")
     else:
         nama = input("Masukkan nama barang: ")
@@ -124,9 +183,25 @@ def input_data_stok_barang():
         bst.insert(sku, nama, harga, stok)
         print("Data stok barang berhasil ditambahkan.")
 
+#fungsi restok_barang ini berfungsi untuk menambahkan stok barang yang sudah ada di dalam binary search tree
 def restok_barang():
-    sku = input("Masukkan SKU (4 digit angka): ")
-    if bst.search(sku):
+    #jika root adalah none maka akan menampilkan pesan belum ada data barang yang diinputkan
+    while True:
+        try:
+            #membuat variabel sku yang berisi dari inputan sku
+            sku = int(input("Masukkan SKU (4 digit angka): "))
+            if 1000 <= sku <= 9999:
+                break
+            else:
+                print("SKU harus terdiri dari 4 digit angka.")
+        except ValueError:
+            print("Input tidak valid. Harap masukkan 4 digit angka.")
+
+    # 1234 , 1235, 1236
+
+    # 1237
+    node = bst.contains(sku) # 1237
+    if node: # true
         jumlah = int(input("Masukkan jumlah stok yang akan ditambahkan: "))
         bst.restock(sku, jumlah)
     else:
@@ -135,8 +210,12 @@ def restok_barang():
 def input_data_transaksi_baru():
     nama_konsumen = input("Masukkan nama konsumen: ")
     while True:
-        sku = input("Masukkan SKU barang yang dibeli: ")
-        node = bst.search(sku)
+        try:
+            sku = int(input("Masukkan SKU barang yang dibeli: "))
+        except ValueError:
+            print("Input tidak valid. Harap masukkan 4 digit angka.")
+            continue
+        node = bst.contains(sku)
         if node:
             jumlah_beli = int(input("Masukkan jumlah yang dibeli: "))
             if jumlah_beli <= node.stok:
@@ -183,6 +262,7 @@ def lihat_data_transaksi_berdasarkan_subtotal():
     for transaksi in sorted_transaksi:
         print(f"Nama Konsumen: {transaksi['nama_konsumen']}, SKU: {transaksi['sku']}, Jumlah Beli: {transaksi['jumlah_beli']}, Subtotal: {transaksi['subtotal']}")
 
+# Main Program
 if __name__ == "__main__":
-    bst = BST()
+    bst = BinarySearchTree()
     menu_utama()
